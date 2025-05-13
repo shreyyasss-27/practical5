@@ -1,27 +1,24 @@
-name: CI Pipeline
+name: CI Pipeline - Save Build Logs
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test || echo "No tests defined" | tee build.log
-
-      - name: Save build logs
+      - name: Run build and save log as text file
         run: |
-          echo "Build completed at $(date)" >> build.log
+          mkdir -p build
+          bash scripts/build.sh | tee build/build-log.txt
+
+      - name: Upload log file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build/build-log.txt
